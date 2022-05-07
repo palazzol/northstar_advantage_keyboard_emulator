@@ -9,6 +9,11 @@ import tkinter as tk
 import serial as serial
 import time as t
 
+# for an interactive keyboard
+INTERACTIVE = True
+# for automated entry of primary bootloader
+#INTERACTIVE = False
+
 keycode_to_keycode = {
    16 : 54, # shift
    17 : 37, # ctrl
@@ -35,7 +40,7 @@ keycode_to_keycode = {
    } 
    
    
-s = serial.Serial('COM5',baudrate=115200)
+s = serial.Serial('COM7',baudrate=115200)
 
 def press(k):
     send(k)
@@ -71,25 +76,25 @@ S.config(command=T.yview)
 T.config(yscrollcommand=S.set)
 T.bind('<Key>', lambda event: keydown(event))
 T.bind('<KeyRelease>', lambda event: keyup(event))
-tk.mainloop()
+if INTERACTIVE:
+    tk.mainloop()
+else:
+    t.sleep(1)
+    press(12)  # clear buffer
+    send(37)
+    t.sleep(.1)
+    send(57)
+    t.sleep(.1)
+    send(57+128)
+    t.sleep(.1)
+    send(37+128)
+    t.sleep(.1)
+    command('DFF00')
+    command('3E80D351D3513E40D3513E7F')
+    command('D3583E4ED3513E37D35106CB')  # <-- this CB has been changed from C9 - secondary bootloader length was changed
+    command('0E502129FFDB50DB51E60228')
+    command('FAEDA220F6')
+    command(chr(13))
+    command('JFF00')
+    s.close()
 
-"""
-t.sleep(1)
-press(12)  # clear buffer
-send(37)
-t.sleep(.1)
-send(57)
-t.sleep(.1)
-send(57+128)
-t.sleep(.1)
-send(37+128)
-t.sleep(.1)
-command('DFF00')
-command('3E80D351D3513E40D3513E7F')
-command('D3583E4ED3513E37D35106C9')
-command('0E502129FFDB50DB51E60228')
-command('FAEDA220F6')
-command(chr(13))
-command('JFF00')
-s.close()
-"""
